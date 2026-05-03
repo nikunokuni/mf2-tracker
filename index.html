@@ -127,14 +127,14 @@ select{height:36px;border:0.5px solid var(--color-border-secondary);border-radiu
 .save-indicator{font-size:11px;color:#3B6D11;opacity:0;transition:opacity 0.3s}
 .save-indicator.show{opacity:1}
 /* モンスターグリッド */
-.monster-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:8px}
+.monster-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
 .monster-cell{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;border-radius:8px;border:0.5px solid transparent;cursor:pointer;transition:all 0.15s}
 .monster-cell:hover{background:var(--color-background-secondary);border-color:var(--color-border-secondary)}
 .monster-cell.no-tech{opacity:0.4;cursor:default}
-.monster-cell img{width:100%;aspect-ratio:1;border-radius:6px;object-fit:cover}
+.monster-cell img{width:100%;aspect-ratio:5/3;border-radius:6px;object-fit:cover;object-position:center center}
 .monster-cell span{font-size:10px;text-align:center;color:var(--color-text-secondary);line-height:1.2;word-break:break-all}
 @media(max-width:400px){
-  .monster-grid{grid-template-columns:repeat(4,1fr)}
+  .monster-grid{grid-template-columns:repeat(3,1fr)}
   .tech-table{font-size:12px}
   .tech-table th,.tech-table td{padding:5px 3px}
   .cnt-val{font-size:14px}
@@ -149,10 +149,11 @@ select{height:36px;border:0.5px solid var(--color-border-secondary);border-radiu
     モンスターを選択
     <span id="saveIndicator" class="save-indicator">✓ 保存済み</span>
   </div>
-  <div class="monster-grid" id="monsterGrid"></div>
+  <button class="btn btn-primary" id="gridToggleBtn" onclick="toggleGrid()" style="margin-bottom:10px;width:100%">＋ 種族を選んで追加</button>
+  <div class="monster-grid" id="monsterGrid" style="display:none"></div>
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-    <span style="font-size:13px;color:var(--color-text-secondary);white-space:nowrap">ガッツ回復：</span>
-    <select id="gutsRecovery" onchange="saveGutsRecovery()" style="width:70px"></select>
+    <span style="font-size:13px;color:var(--color-text-secondary);white-space:nowrap">追加時のガッツ回復：</span>
+    <select id="gutsRecovery" style="width:70px"></select>
   </div>
   <div id="monsterChips" class="monster-bar"></div>
 </div>
@@ -174,6 +175,10 @@ select{height:36px;border:0.5px solid var(--color-border-secondary);border-radiu
       <span id="monLabel"></span>
       <span id="sessionBadge" class="badge-idle">大会なし</span>
       <button class="btn btn-sm btn-primary" onclick="showTechSelect()" style="margin-left:auto">技を変更</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:12px;color:var(--color-text-secondary);white-space:nowrap">ガッツ回復：</span>
+      <select id="monGutsRecovery" onchange="saveMonGutsRecovery()" style="width:65px;height:30px;font-size:13px"></select>
     </div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
     <table class="tech-table">
@@ -266,6 +271,14 @@ let techCheckState = {};
 
 function techKey(t){ return t.from+"→"+t.to; }
 
+
+function toggleGrid() {
+  const grid = document.getElementById("monsterGrid");
+  const btn = document.getElementById("gridToggleBtn");
+  const isOpen = grid.style.display !== "none";
+  grid.style.display = isOpen ? "none" : "grid";
+  btn.textContent = isOpen ? "＋ 種族を選んで追加" : "✕ 閉じる";
+}
 async function loadState() {
   try {
     const val = localStorage.getItem("mf2_mf2v8_state");
@@ -302,7 +315,14 @@ function initGutsSelect() {
 
 function saveGutsRecovery() {
   state.gutsRecovery = parseInt(document.getElementById("gutsRecovery").value) || 15;
-  saveState(); renderTechs();
+  saveState();
+}
+
+function saveMonGutsRecovery() {
+  const m = currentMon(); if (!m) return;
+  m.gutsRecovery = parseInt(document.getElementById("monGutsRecovery").value) || 15;
+  saveState();
+  renderTechs();
 }
 
 function renderGrid() {
@@ -337,18 +357,23 @@ function renderGrid() {
 function currentMon() { return state.monsters.find(m => m.id === state.current) || null; }
 
 function addMonsterByName(name) {
+  // グリッドを閉じる
+  const grid = document.getElementById("monsterGrid");
+  const btn = document.getElementById("gridToggleBtn");
+  grid.style.display = "none";
+  btn.textContent = "＋ 種族を選んで追加";
   // 既存モンスターなら選択
   const existing = state.monsters.find(m => m.name === name);
   if (existing) { state.current = existing.id; renderAll(); return; }
-  const m = {id:Date.now(), name, techs:[], session:false, log:[]};
+  const gr = parseInt(document.getElementById("gutsRecovery").value) || 15;
+  const m = {id:Date.now(), name, techs:[], session:false, log:[], gutsRecovery:gr};
   state.monsters.push(m);
   state.current = m.id;
   saveState(); renderAll(); showTechSelect();
 }
 
 function deleteMon(id) {
-  if (!confirm("このモンスターのデータを削除しますか？
-（技の履歴データも全て削除されます）")) return;
+  if (!confirm("このモンスターのデータを削除しますか？\n（技の履歴データも全て削除されます）")) return;
   const m = state.monsters.find(m => m.id === id);
   if (m && state.techHistory[m.name]) delete state.techHistory[m.name];
   state.monsters = state.monsters.filter(m => m.id !== id);
@@ -505,6 +530,15 @@ function renderAll() {
   if (!m) { main.style.display="none"; return; }
   main.style.display="block";
   document.getElementById("monLabel").textContent = m.name;
+  // モンスターごとのガッツ回復セレクトを初期化
+  const monGutsSel = document.getElementById("monGutsRecovery");
+  monGutsSel.innerHTML = "";
+  for (let i = 6; i <= 19; i++) {
+    const o = document.createElement("option");
+    o.value = i; o.textContent = i;
+    if (i === (m.gutsRecovery || state.gutsRecovery || 15)) o.selected = true;
+    monGutsSel.appendChild(o);
+  }
   const badge = document.getElementById("sessionBadge");
   badge.className = m.session ? "badge-active" : "badge-idle";
   badge.textContent = m.session ? "大会中" : "大会なし";
@@ -513,7 +547,7 @@ function renderAll() {
 
 function renderTechs() {
   const m = currentMon(); if (!m) return;
-  const gr = state.gutsRecovery || 15;
+  const gr = m.gutsRecovery || state.gutsRecovery || 15;
   const body = document.getElementById("techBody");
   body.innerHTML = "";
   if (!m.techs.length) {
