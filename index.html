@@ -45,6 +45,32 @@
   </style>
 </head>
 <body>
+<script>
+// GitHub Pages用ストレージポリフィル - loadStateより前に必ず定義
+window.storage = {
+  async get(key) {
+    const val = localStorage.getItem('mf2_' + key);
+    if (val === null) throw new Error('not found');
+    return { key, value: val };
+  },
+  async set(key, value) {
+    try {
+      localStorage.setItem('mf2_' + key, typeof value === 'string' ? value : JSON.stringify(value));
+      return { key, value };
+    } catch(e) { return null; }
+  },
+  async delete(key) {
+    localStorage.removeItem('mf2_' + key);
+    return { key, deleted: true };
+  },
+  async list(prefix) {
+    const keys = Object.keys(localStorage)
+      .filter(k => k.startsWith('mf2_' + (prefix || '')))
+      .map(k => k.replace('mf2_', ''));
+    return { keys };
+  }
+};
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 select,input,button{font-family:var(--font-sans)}
@@ -242,10 +268,8 @@ function techKey(t){ return t.from+"→"+t.to; }
 
 async function loadState() {
   try {
-    if (window.storage) {
-      const r = await window.storage.get("mf2v8_state");
-      if (r) state = JSON.parse(r.value);
-    }
+    const val = localStorage.getItem("mf2_mf2v8_state");
+    if (val) state = JSON.parse(val);
   } catch(e){}
   if (!state.monsters) state.monsters = [];
   if (!state.gutsRecovery) state.gutsRecovery = 15;
@@ -256,7 +280,7 @@ async function loadState() {
 }
 
 function saveState() {
-  try { window.storage && window.storage.set("mf2v8_state", JSON.stringify(state)); showSaveIndicator(); } catch(e){}
+  try { localStorage.setItem("mf2_mf2v8_state", JSON.stringify(state)); showSaveIndicator(); } catch(e){}
 }
 
 function showSaveIndicator() {
@@ -483,36 +507,7 @@ function renderLog() {
 
 loadState();
 </script>
-<script>
-// GitHub Pages用ストレージポリフィル（localStorage使用）
-if (!window.storage) {
-  window.storage = {
-    async get(key) {
-      try {
-        const val = localStorage.getItem('mf2_' + key);
-        if (val === null) throw new Error('not found');
-        return { key, value: val };
-      } catch(e) { throw e; }
-    },
-    async set(key, value) {
-      try {
-        localStorage.setItem('mf2_' + key, typeof value === 'string' ? value : JSON.stringify(value));
-        return { key, value };
-      } catch(e) { return null; }
-    },
-    async delete(key) {
-      localStorage.removeItem('mf2_' + key);
-      return { key, deleted: true };
-    },
-    async list(prefix) {
-      const keys = Object.keys(localStorage)
-        .filter(k => k.startsWith('mf2_' + (prefix || '')))
-        .map(k => k.replace('mf2_', ''));
-      return { keys };
-    }
-  };
-}
-</script>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
