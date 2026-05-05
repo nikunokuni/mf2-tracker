@@ -573,6 +573,7 @@ function renderTechs() {
     const fromSpan = document.createElement("span");
     fromSpan.style.color = "var(--color-text-secondary)";
     fromSpan.textContent = t.from + " → ";
+    fromSpan.style.display = "block";
     const toStrong = document.createElement("strong");
     toStrong.textContent = t.to;
     tdName.appendChild(fromSpan);
