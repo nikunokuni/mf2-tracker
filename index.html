@@ -210,8 +210,8 @@ select{height:36px;border:0.5px solid var(--color-border-secondary);border-radiu
 <script>
 const BATTLE_TIME = 60, INIT_GUTS = 50, GUTS_PER_RECOVERY = 30;
 
-function calcIdeal(gutsCost, motionTime, mogutsRecovery) {
-  const rps = GUTS_PER_RECOVERY / moGutsRecovery;
+function calcIdeal(gutsCost, motionTime, monGutsRecovery) {
+  const rps = GUTS_PER_RECOVERY / monGutsRecovery;
   let g = INIT_GUTS, t = 0, n = 0;
   while (t < BATTLE_TIME) {
     if (g < gutsCost) { t += (gutsCost - g) / rps; g = gutsCost; if (t >= BATTLE_TIME) break; }
@@ -268,7 +268,7 @@ const MONSTER_DATA = {
 const NO_TECH = new Set(["ライガー","スエゾー","ジョーカー"]);
 
 // state: techHistoryは {モンスター名: {技キー: {total, done}}} で保持
-let state = {monsters:[], current:null, moGutsRecovery:15, techHistory:{}};
+let state = {monsters:[], current:null, monGutsRecovery:15, techHistory:{}};
 let techCheckState = {};
 
 function techKey(t){ return t.from+"→"+t.to; }
@@ -287,7 +287,7 @@ async function loadState() {
     if (val) state = JSON.parse(val);
   } catch(e){}
   if (!state.monsters) state.monsters = [];
-  if (!state.moGutsRecovery) state.moGutsRecovery = 15;
+  if (!state.monGutsRecovery) state.monGutsRecovery = 15;
   if (!state.techHistory) state.techHistory = {};
   initGutsSelect();
   renderGrid();
@@ -305,24 +305,24 @@ function showSaveIndicator() {
 }
 
 function initGutsSelect() {
-  const sel = document.getElementById("moGutsRecovery");
+  const sel = document.getElementById("monGutsRecovery");
   sel.innerHTML = "";
   for (let i = 6; i <= 19; i++) {
     const o = document.createElement("option");
     o.value = i; o.textContent = i;
-    if (i === (state.moGutsRecovery || 15)) o.selected = true;
+    if (i === (state.monGutsRecovery || 15)) o.selected = true;
     sel.appendChild(o);
   }
 }
 
 function saveGutsRecovery() {
-  state.moGutsRecovery = parseInt(document.getElementById("moGutsRecovery").value) || 15;
+  state.monGutsRecovery = parseInt(document.getElementById("monGutsRecovery").value) || 15;
   saveState();
 }
 
 function saveMonGutsRecovery() {
   const m = currentMon(); if (!m) return;
-  m.moGutsRecovery = parseInt(document.getElementById("monGutsRecovery").value) || 15;
+  m.monGutsRecovery = parseInt(document.getElementById("monGutsRecovery").value) || 15;
   saveState();
   renderTechs();
 }
@@ -367,8 +367,8 @@ function addMonsterByName(name) {
   // 既存モンスターなら選択
   const existing = state.monsters.find(m => m.name === name);
   if (existing) { state.current = existing.id; renderAll(); return; }
-  const gr = parseInt(document.getElementById("moGutsRecovery").value) || 15;
-  const m = {id:Date.now(), name, techs:[], session:false, log:[], moGutsRecovery:gr};
+  const gr = parseInt(document.getElementById("monGutsRecovery").value) || 15;
+  const m = {id:Date.now(), name, techs:[], session:false, log:[], monGutsRecovery:gr};
   state.monsters.push(m);
   state.current = m.id;
   saveState(); renderAll(); showTechSelect();
@@ -538,7 +538,7 @@ function renderAll() {
   for (let i = 6; i <= 19; i++) {
     const o = document.createElement("option");
     o.value = i; o.textContent = i;
-    if (i === (m.moGutsRecovery || state.moGutsRecovery || 15)) o.selected = true;
+    if (i === (m.monGutsRecovery || state.monGutsRecovery || 15)) o.selected = true;
     monGutsSel.appendChild(o);
   }
   const badge = document.getElementById("sessionBadge");
@@ -549,7 +549,7 @@ function renderAll() {
 
 function renderTechs() {
   const m = currentMon(); if (!m) return;
-  const gr = m.moGutsRecovery || state.moGutsRecovery || 15;
+  const gr = m.monGutsRecovery || state.monGutsRecovery || 15;
   const body = document.getElementById("techBody");
   body.innerHTML = "";
   if (!m.techs.length) {
