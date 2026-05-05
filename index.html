@@ -151,10 +151,7 @@ select{height:36px;border:0.5px solid var(--color-border-secondary);border-radiu
   </div>
   <button class="btn btn-primary" id="gridToggleBtn" onclick="toggleGrid()" style="margin-bottom:10px;width:100%">＋ 種族を選んで追加</button>
   <div class="monster-grid" id="monsterGrid" style="display:none"></div>
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-    <span style="font-size:13px;color:var(--color-text-secondary);white-space:nowrap">追加時のガッツ回復：</span>
-    <select id="gutsRecovery" style="width:70px"></select>   
-  </div> 
+
   <div id="monsterChips" class="monster-bar"></div>
 </div>
 
@@ -185,11 +182,11 @@ select{height:36px;border:0.5px solid var(--color-border-secondary);border-radiu
       <thead>
         <tr>
           <th>技名（下位→上位）</th>
+          <th>累計</th>
+          <th>今回</th>
           <th>消費G</th>
           <th class="th-hit">理想<br>命中</th>
           <th class="th-miss">理想<br>外れ</th>
-          <th>累計</th>
-          <th>今回</th>
         </tr>
       </thead>
       <tbody id="techBody"></tbody>
@@ -582,24 +579,6 @@ function renderTechs() {
       tdName.appendChild(ms);
     }
     tr.appendChild(tdName);
-    // 消費Gセル
-    const tdG = document.createElement("td");
-    tdG.textContent = t.guts;
-    tr.appendChild(tdG);
-    // 理想命中
-    const tdIH = document.createElement("td");
-    const ihSpan = document.createElement("span");
-    ihSpan.className = "ideal-hit";
-    ihSpan.textContent = ih;
-    tdIH.appendChild(ihSpan);
-    tr.appendChild(tdIH);
-    // 理想外れ
-    const tdIM = document.createElement("td");
-    const imSpan = document.createElement("span");
-    imSpan.className = "ideal-miss";
-    imSpan.textContent = im;
-    tdIM.appendChild(imSpan);
-    tr.appendChild(tdIM);
     // 累計セル
     const tdTotal = document.createElement("td");
     if (t.done) {
@@ -644,6 +623,24 @@ function renderTechs() {
       tdSession.textContent = "—";
     }
     tr.appendChild(tdSession);
+    // 消費Gセル
+    const tdG = document.createElement("td");
+    tdG.textContent = t.guts;
+    tr.appendChild(tdG);
+    // 理想命中
+    const tdIH = document.createElement("td");
+    const ihSpan = document.createElement("span");
+    ihSpan.className = "ideal-hit";
+    ihSpan.textContent = ih;
+    tdIH.appendChild(ihSpan);
+    tr.appendChild(tdIH);
+    // 理想外れ
+    const tdIM = document.createElement("td");
+    const imSpan = document.createElement("span");
+    imSpan.className = "ideal-miss";
+    imSpan.textContent = im;
+    tdIM.appendChild(imSpan);
+    tr.appendChild(tdIM);
     body.appendChild(tr);
   });
 }
