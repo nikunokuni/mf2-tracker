@@ -572,10 +572,11 @@ function renderTechs() {
     tdName.style.fontSize = "12px";
     const fromSpan = document.createElement("span");
     fromSpan.style.color = "var(--color-text-secondary)";
-    fromSpan.textContent = t.from + " → ";
+    fromSpan.textContent = t.from;
     fromSpan.style.display = "block";
     const toStrong = document.createElement("strong");
-    toStrong.textContent = t.to;
+    toStrong.textContent = "→" + t.to;
+    toStrong.style.display = "block";
     tdName.appendChild(fromSpan);
     tdName.appendChild(toStrong);
     if (t.milestone) {
