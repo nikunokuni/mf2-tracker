@@ -151,13 +151,12 @@ select{height:36px;border:0.5px solid var(--color-border-secondary);border-radiu
   </div>
   <button class="btn btn-primary" id="gridToggleBtn" onclick="toggleGrid()" style="margin-bottom:10px;width:100%">＋ 種族を選んで追加</button>
   <div class="monster-grid" id="monsterGrid" style="display:none"></div>
-<!--
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-    <span style="font-size:13px;color:var(--color-text-secondary);white-space:nowrap">追加時のガッツ回復：</span>
-    <select id="gutsRecovery" style="width:70px"></select>   
-  </div> 
-  -->
   <div id="monsterChips" class="monster-bar"></div>
+   <div class="card">
+    <div class="section-head">メモ</div>
+    <textarea id="monMemo" placeholder="自由にメモできます..." oninput="saveMonMemo()"
+      style="width:100%;min-height:100px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 10px;font-size:13px;font-family:var(--font-sans);background:var(--color-background-primary);color:var(--color-text-primary);resize:vertical;line-height:1.6;outline:none"></textarea>
+  </div>
 </div>
 
 <!-- 技選択カード -->
@@ -203,11 +202,7 @@ select{height:36px;border:0.5px solid var(--color-border-secondary);border-radiu
     <div class="section-head">履歴</div>
     <div id="logArea"><div class="empty">まだ記録がありません</div></div>
   </div>
-   <div class="card">
-    <div class="section-head">メモ</div>
-    <textarea id="monMemo" placeholder="自由にメモできます..." oninput="saveMonMemo()"
-      style="width:100%;min-height:100px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 10px;font-size:13px;font-family:var(--font-sans);background:var(--color-background-primary);color:var(--color-text-primary);resize:vertical;line-height:1.6;outline:none"></textarea>
-  </div>
+  
 
 </div>
 
